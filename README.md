@@ -207,7 +207,8 @@ public class MyPlugin {
 
 ## Credits
 
-- [EpicGuard](https://github.com/4drian3d/EpicGuard) by [xxneox](https://github.com/xxneox) — Original antibot plugin (GPL-3.0)
+- [EpicGuard](https://github.com/4drian3d/EpicGuard) — Original work by [xxneox](https://github.com/xxneox), later maintained by [awumii](https://github.com/awumii) and [4drian3d](https://github.com/4drian3d) (GPL-3.0)
+
 - [AntiVPN](https://github.com/funkemunky/AntiVPN) by [funkemunky](https://github.com/funkemunky) — Staff alerts, command execution, and prefix whitelisting features (Apache-2.0)
 
 ## License
