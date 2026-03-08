@@ -1,0 +1,84 @@
+/*
+ * EpicGuardPlus is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * EpicGuardPlus is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ */
+
+package me.xneox.epicguard.core;
+
+import java.util.UUID;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+
+public interface Platform {
+  /**
+   * @return Name and version of this platform.
+   */
+  @NotNull
+  String platformVersion();
+
+  /**
+   * @return A wrapper of the platform plugin's logger.
+   */
+  @NotNull
+  Logger logger();
+
+  /**
+   * @param uuid UUID of the online user.
+   * @return an audience for the provided user's uuid.
+   */
+  @Nullable
+  Audience audience(@NotNull UUID uuid);
+
+  /**
+   * Kicks the user from the server with a specified message (find the player using User#getUUID).
+   *
+   * @param uuid The UUID of user to be kicked.
+   * @param message The kick message.
+   */
+  void disconnectUser(@NotNull UUID uuid, @NotNull Component message);
+
+  /**
+   * Schedules a task to be run asynchronously after the specified time (in seconds).
+   *
+   * @param task The task to be scheduled.
+   * @param seconds Delay in seconds after the task should be ran.
+   */
+  void runTaskLater(@NotNull Runnable task, long seconds);
+
+  /**
+   * Schedules a task to be run asynchronously repeatedly with fixed delay (in seconds).
+   *
+   * @param task The task to be scheduled.
+   * @param seconds Delay in seconds between each runs of the task.
+   */
+  void scheduleRepeatingTask(@NotNull Runnable task, long seconds);
+
+  /**
+   * Dispatches a command as the console.
+   *
+   * @param command The command to execute (without leading slash).
+   */
+  void dispatchCommand(@NotNull String command);
+
+  /**
+   * Checks if an online player has a specific permission.
+   *
+   * @param uuid The UUID of the player.
+   * @param permission The permission node to check.
+   * @return true if the player has the permission, false if not or if the player is offline.
+   */
+  boolean hasPermission(@NotNull UUID uuid, @NotNull String permission);
+}

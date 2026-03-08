@@ -1,0 +1,10 @@
+name: EpicGuardPlus
+version: ${version}
+main: me.xneox.epicguard.waterfall.EpicGuardWaterfall
+
+author: Sqouidly
+website: https://github.com/Sqouidly/EpicGuardPlus
+description: Enhanced bot protection plugin for Minecraft servers with extended security features.
+
+libraries:
+  - org.xerial:sqlite-jdbc:3.36.0.3

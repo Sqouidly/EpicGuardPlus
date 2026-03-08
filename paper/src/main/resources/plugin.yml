@@ -1,0 +1,14 @@
+name: EpicGuardPlus
+version: '${version}'
+main: me.xneox.epicguard.paper.EpicGuardPaper
+api-version: 1.16
+
+author: Sqouidly
+website: https://github.com/Sqouidly/EpicGuardPlus
+description: Enhanced bot protection plugin for Minecraft servers with extended security features.
+
+commands:
+  epicguard:
+    description: Main plugin command.
+    permission: epicguard.admin
+    aliases: [ guard, epicguardpaper, guardpaper ]
