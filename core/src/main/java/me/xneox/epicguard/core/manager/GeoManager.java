@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.function.Consumer;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import me.xneox.epicguard.core.EpicGuard;
@@ -46,12 +47,23 @@ public class GeoManager {
     this.epicGuard = epicGuard;
     epicGuard.logger().info("This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com");
 
-    var parent = new File(FileUtils.EPICGUARD_DIR, "/data");
+    var parent = new File(FileUtils.EPICGUARD_DIR, "data");
     //noinspection ResultOfMethodCallIgnored
     parent.mkdirs();
 
-    var countryDatabase = new File(parent, "GeoLite2-Country.mmdb");
-    var cityDatabase = new File(parent, "GeoLite2-City.mmdb");
+    var countryDatabasePath = epicGuard.config().misc().geoCountryDatabaseFile();
+    var cityDatabasePath = epicGuard.config().misc().geoCityDatabaseFile();
+    var customCountryDatabase = this.hasText(countryDatabasePath);
+    var customCityDatabase = this.hasText(cityDatabasePath);
+
+    var countryDatabase = this.databaseFile(
+        countryDatabasePath,
+        new File(parent, "GeoLite2-Country.mmdb"),
+        "country");
+    var cityDatabase = this.databaseFile(
+        cityDatabasePath,
+        new File(parent, "GeoLite2-City.mmdb"),
+        "city");
 
     var countryArchive = new File(parent, "GeoLite2-Country.tar.gz");
     var cityArchive = new File(parent, "GeoLite2-City.tar.gz");
@@ -60,18 +72,7 @@ public class GeoManager {
     if (!epicGuard.config().misc().geoDatabaseDownload()) {
       epicGuard.logger().info("GeoIP database download is disabled in configuration.");
       // Try to use existing databases if available
-      try {
-        if (countryDatabase.exists()) {
-          this.countryReader = new DatabaseReader.Builder(countryDatabase).withCache(new CHMCache()).build();
-          epicGuard.logger().info("Loaded existing GeoIP country database.");
-        }
-        if (cityDatabase.exists()) {
-          this.cityReader = new DatabaseReader.Builder(cityDatabase).withCache(new CHMCache()).build();
-          epicGuard.logger().info("Loaded existing GeoIP city database.");
-        }
-      } catch (IOException ex) {
-        epicGuard.logger().warn("Couldn't load existing GeoIP databases: " + ex.getMessage());
-      }
+      this.loadDatabases(countryDatabase, cityDatabase);
       return;
     }
 
@@ -82,33 +83,62 @@ public class GeoManager {
       epicGuard.logger().warn("Then set it in settings.conf under misc.maxmind-license-key");
 
       // Try to use existing databases if they were downloaded before
-      try {
-        if (countryDatabase.exists()) {
-          this.countryReader = new DatabaseReader.Builder(countryDatabase).withCache(new CHMCache()).build();
-        }
-        if (cityDatabase.exists()) {
-          this.cityReader = new DatabaseReader.Builder(cityDatabase).withCache(new CHMCache()).build();
-        }
-      } catch (IOException ex) {
-        epicGuard.logger().warn("Couldn't load existing GeoIP databases: " + ex.getMessage());
-      }
+      this.loadDatabases(countryDatabase, cityDatabase);
       return;
     }
 
     try {
-      this.downloadDatabase(
-          countryDatabase,
-          countryArchive,
-          "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=" + licenseKey + "&suffix=tar.gz");
-      this.downloadDatabase(
-          cityDatabase,
-          cityArchive,
-          "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=" + licenseKey + "&suffix=tar.gz");
+      if (!customCountryDatabase) {
+        this.downloadDatabase(
+            countryDatabase,
+            countryArchive,
+            "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=" + licenseKey + "&suffix=tar.gz");
+      }
+      if (!customCityDatabase) {
+        this.downloadDatabase(
+            cityDatabase,
+            cityArchive,
+            "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=" + licenseKey + "&suffix=tar.gz");
+      }
 
-      this.countryReader = new DatabaseReader.Builder(countryDatabase).withCache(new CHMCache()).build();
-      this.cityReader = new DatabaseReader.Builder(cityDatabase).withCache(new CHMCache()).build();
+      this.loadDatabases(countryDatabase, cityDatabase);
     } catch (IOException ex) {
       LogUtils.catchException("Couldn't download the GeoIP databases. Check your license key and internet connection.", ex);
+    }
+  }
+
+  private boolean hasText(String value) {
+    return value != null && !value.isBlank();
+  }
+
+  private File databaseFile(@NotNull String configuredPath, @NotNull File defaultFile, @NotNull String databaseName) {
+    if (!this.hasText(configuredPath)) {
+      return defaultFile;
+    }
+
+    var configuredFile = new File(configuredPath);
+    if (!configuredFile.exists()) {
+      this.epicGuard.logger().warn("Configured GeoIP " + databaseName + " database does not exist: " + configuredFile.getPath());
+    }
+    return configuredFile;
+  }
+
+  private void loadDatabases(@NotNull File countryDatabase, @NotNull File cityDatabase) {
+    this.loadDatabase(countryDatabase, "country", reader -> this.countryReader = reader);
+    this.loadDatabase(cityDatabase, "city", reader -> this.cityReader = reader);
+  }
+
+  private void loadDatabase(@NotNull File database, @NotNull String databaseName, @NotNull Consumer<DatabaseReader> readerConsumer) {
+    if (!database.exists()) {
+      this.epicGuard.logger().warn("GeoIP " + databaseName + " database was not found: " + database.getPath());
+      return;
+    }
+
+    try {
+      readerConsumer.accept(new DatabaseReader.Builder(database).withCache(new CHMCache()).build());
+      this.epicGuard.logger().info("Loaded GeoIP " + databaseName + " database: " + database.getPath());
+    } catch (IOException ex) {
+      this.epicGuard.logger().warn("Couldn't load GeoIP " + databaseName + " database: " + ex.getMessage());
     }
   }
 
@@ -144,7 +174,7 @@ public class GeoManager {
     var inetAddress = TextUtils.parseAddress(address);
     if (inetAddress != null && this.countryReader != null) {
       try {
-        return this.countryReader.country(inetAddress).getCountry().getIsoCode();
+        return this.valueOrUnknown(this.countryReader.country(inetAddress).getCountry().getIsoCode());
       } catch (IOException | GeoIp2Exception ex) {
         this.epicGuard.logger().warn("Couldn't find the country for the address " + address + ": " + ex.getMessage());
       }
@@ -157,11 +187,15 @@ public class GeoManager {
     var inetAddress = TextUtils.parseAddress(address);
     if (inetAddress != null && this.cityReader != null) {
       try {
-        return this.cityReader.city(inetAddress).getCity().getName();
+        return this.valueOrUnknown(this.cityReader.city(inetAddress).getCity().getName());
       } catch (IOException | GeoIp2Exception ex) {
         this.epicGuard.logger().warn("Couldn't find the city for the address " + address + ": " + ex.getMessage());
       }
     }
     return "unknown";
+  }
+
+  private String valueOrUnknown(String value) {
+    return value == null || value.isBlank() ? "unknown" : value;
   }
 }

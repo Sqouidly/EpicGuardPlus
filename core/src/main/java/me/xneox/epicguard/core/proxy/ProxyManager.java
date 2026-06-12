@@ -45,6 +45,12 @@ public class ProxyManager {
    * @return Whenever the address is detected to be a proxy or not.
    */
   public boolean isProxy(@NotNull String address) {
+    var cachedResult = this.resultCache.getIfPresent(address);
+    if (cachedResult != null) {
+      LogUtils.debug("Using cached proxy result for " + address + ": " + cachedResult);
+      return cachedResult;
+    }
+
     return this.resultCache.asMap().computeIfAbsent(address, userIp -> {
       for (ProxyService service : this.epicGuard.config().proxyCheck().services()) {
         String url = service.url().replace("{IP}", userIp);

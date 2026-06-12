@@ -454,6 +454,12 @@ public class PluginConfiguration {
     @Comment("Set to false to not try to download the latest geolocation database.")
     private boolean geoDatabaseDownload = true;
 
+    @Comment("Optional path to a custom GeoLite2-Country.mmdb file. Leave empty to use the default downloaded file.")
+    private String geoCountryDatabaseFile = "";
+
+    @Comment("Optional path to a custom GeoLite2-City.mmdb file. Leave empty to use the default downloaded file.")
+    private String geoCityDatabaseFile = "";
+
     @Comment("Players with nicknames starting with any of these prefixes will bypass all checks.\n"
         + "Useful for Bedrock players (e.g. \".\") or other exemptions.")
     private List<String> prefixWhitelists = new ArrayList<>();
@@ -497,6 +503,14 @@ public class PluginConfiguration {
 
     public boolean geoDatabaseDownload() {
       return this.geoDatabaseDownload;
+    }
+
+    public String geoCountryDatabaseFile() {
+      return this.geoCountryDatabaseFile;
+    }
+
+    public String geoCityDatabaseFile() {
+      return this.geoCityDatabaseFile;
     }
 
     public List<String> prefixWhitelists() {

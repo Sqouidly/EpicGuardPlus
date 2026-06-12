@@ -6,7 +6,7 @@
 [![GitHub license](https://img.shields.io/github/license/Sqouidly/EpicGuardPlus)](https://github.com/Sqouidly/EpicGuardPlus/blob/master/LICENSE)
 [![Java CI](https://github.com/Sqouidly/EpicGuardPlus/actions/workflows/maven.yml/badge.svg)](https://github.com/Sqouidly/EpicGuardPlus/actions/workflows/maven.yml)
 
-**🛡️➕ Enhanced bot protection plugin for Minecraft servers with extended security features.**
+**Enhanced bot protection plugin for Minecraft servers with extended security features.**
 
 EpicGuardPlus is an actively maintained fork of [EpicGuard](https://github.com/4drian3d/EpicGuard) (originally by [xxneox](https://github.com/xxneox)), with integrated features from [AntiVPN](https://github.com/funkemunky/AntiVPN) by [funkemunky](https://github.com/funkemunky). Provides robust antibot and anti-VPN protection for your Minecraft server across multiple platforms.
 
@@ -210,8 +210,10 @@ public class MyPlugin {
 - EpicGuard - Forked from [EpicGuard](https://github.com/4drian3d/EpicGuard) by [4drian3d](https://github.com/4drian3d) (GPL-3.0)
 - [AntiVPN](https://github.com/funkemunky/AntiVPN) by [funkemunky](https://github.com/funkemunky) - Staff alerts, command execution, and prefix whitelisting features (Apache-2.0)
 
+
 ## License
 
 This project is licensed under the [GNU General Public License v3.0](LICENSE).
 
 Portions of this project are derived from [AntiVPN](https://github.com/funkemunky/AntiVPN), licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+See [LICENSE](LICENSE) for the full GPLv3 terms and third-party notice.

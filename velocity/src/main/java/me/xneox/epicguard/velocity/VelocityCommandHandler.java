@@ -16,6 +16,7 @@
 package me.xneox.epicguard.velocity;
 
 import com.velocitypowered.api.command.SimpleCommand;
+import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import java.util.ArrayList;
 import java.util.List;
 import me.xneox.epicguard.core.EpicGuard;
@@ -38,6 +39,9 @@ public class VelocityCommandHandler extends CommandHandler implements SimpleComm
 
   @Override
   public boolean hasPermission(Invocation invocation) {
+    if (invocation.source() instanceof ConsoleCommandSource) {
+      return true;
+    }
     return invocation.source().hasPermission("epicguard.admin");
   }
 }

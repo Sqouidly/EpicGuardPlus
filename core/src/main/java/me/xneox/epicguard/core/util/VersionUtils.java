@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
  * This util holds current EpicGuardPlus version and checks for the latest available version.
  */
 public final class VersionUtils {
-  public static final String CURRENT_VERSION = "1.0.0";
+  public static final String CURRENT_VERSION = "1.0.1";
   private static final String CHECK_URL = "https://raw.githubusercontent.com/Sqouidly/EpicGuardPlus/master/VERSION.txt";
 
   private static boolean updateAvailable;

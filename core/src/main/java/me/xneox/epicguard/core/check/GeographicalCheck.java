@@ -15,6 +15,7 @@
 
 package me.xneox.epicguard.core.check;
 
+import java.util.Locale;
 import me.xneox.epicguard.core.EpicGuard;
 import me.xneox.epicguard.core.check.AbstractCheck;
 import me.xneox.epicguard.core.user.ConnectingUser;
@@ -34,17 +35,23 @@ public class GeographicalCheck extends AbstractCheck {
   }
 
   private boolean isRestricted(String address) {
-    String country = this.epicGuard.geoManager().countryCode(address);
-    String city = this.epicGuard.geoManager().city(address);
+    String country = this.normalize(this.epicGuard.geoManager().countryCode(address));
+    String city = this.normalize(this.epicGuard.geoManager().city(address));
 
-    if (this.epicGuard.config().geographical().cityBlacklist().contains(city)) {
+    if (this.epicGuard.config().geographical().cityBlacklist().stream().anyMatch(city::equalsIgnoreCase)) {
       return true;
     }
 
     if (this.epicGuard.config().geographical().isBlacklist()) {
-      return this.epicGuard.config().geographical().countries().contains(country);
+      return this.epicGuard.config().geographical().countries().stream()
+          .anyMatch(configuredCountry -> configuredCountry.equalsIgnoreCase(country));
     } else {
-      return !this.epicGuard.config().geographical().countries().contains(country);
+      return this.epicGuard.config().geographical().countries().stream()
+          .noneMatch(configuredCountry -> configuredCountry.equalsIgnoreCase(country));
     }
+  }
+
+  private String normalize(String value) {
+    return value == null || value.isBlank() ? "unknown" : value.toUpperCase(Locale.ROOT);
   }
 }
