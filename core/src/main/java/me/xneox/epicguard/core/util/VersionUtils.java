@@ -36,6 +36,7 @@ public final class VersionUtils {
     if (latest == null) {
       return; // a warning will be thrown by the URLUtils anyway.
     }
+    latest = latest.trim();
 
     var latestVersion = new Version(latest);
     var currentVersion = new Version(CURRENT_VERSION);
@@ -58,7 +59,7 @@ public final class VersionUtils {
     public final int[] numbers;
 
     public Version(@NotNull String version) {
-      var split = version.split("-")[0].split("\\.");
+      var split = version.trim().split("-")[0].split("\\.");
       numbers = new int[split.length];
       for (int i = 0; i < split.length; i++) {
         numbers[i] = Integer.parseInt(split[i]);
